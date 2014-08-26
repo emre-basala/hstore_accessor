@@ -1,8 +1,8 @@
 require "spec_helper"
 require "active_support/all"
-
+require "byebug"
 FIELDS = {
-  color: :string,
+  color: { data_type: :string, default: 'blue' },
   price: :integer,
   published: { data_type: :boolean, store_key: "p" },
   weight: { data_type: :float, store_key: "w" },
@@ -77,6 +77,16 @@ describe HstoreAccessor do
         product_a.send("#{field}=", nil)
         expect(product_a.send(field)).to be_nil
       end
+    end
+  end
+
+  describe "default values" do
+    let!(:product) { Product.new }
+    let!(:product_a) { Product.create(color: "green") }
+
+    it "can have default values" do
+      expect(product.color).to eq 'blue'
+      expect(product_a.color).to eq 'green'
     end
   end
 
