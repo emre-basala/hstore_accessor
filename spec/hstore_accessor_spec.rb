@@ -1,8 +1,8 @@
 require "spec_helper"
 require "active_support/all"
-require "byebug"
+
 FIELDS = {
-  color: { data_type: :string, default: 'blue' },
+  color: :string,
   price: :integer,
   published: { data_type: :boolean, store_key: "p" },
   weight: { data_type: :float, store_key: "w" },
@@ -11,7 +11,7 @@ FIELDS = {
   tags: :array,
   reviews: :hash,
   released_at: :date,
-  miles: :decimal
+  miles: :decimal,
 }
 
 class Product < ActiveRecord::Base

@@ -2,6 +2,7 @@ require "byebug"
 module HstoreAccessor
   module Macro
     module ClassMethods
+
       def hstore_accessor(hstore_attribute, fields)
         define_method("hstore_metadata_for_#{hstore_attribute}") do
           fields
@@ -9,21 +10,19 @@ module HstoreAccessor
 
         field_methods = Module.new
 
-        field_methods.send(:define_method, "callbacks") do
-          "dfgdg"
-        end
-
-        callbacks = ['dfgdf']
-
+        @@a = []
         fields.each do |key, type|
           data_type = type
           store_key = key
 
           if type.is_a?(Hash)
             type = type.with_indifferent_access
-            data_type = type[:data_type]
-            store_key = type[:store_key] || key
-            default   = type[:default]
+            data_type   = type[:data_type]
+            store_key   = type[:store_key]
+            default     = type[:default]
+            if default.present?
+              @@a << (->(s) { s.send("#{key}=", default) unless s.send("#{key}") })
+            end
           end
 
           data_type = data_type.to_sym
@@ -91,6 +90,10 @@ module HstoreAccessor
           end
         end
 
+        field_methods.send(:define_method, "callbacks") do
+         return @@a
+        end
+
         include field_methods
       end
     end
@@ -98,8 +101,7 @@ module HstoreAccessor
   end
 
   def self.included(base)
-    debugger
-    base.send(:after_initialize, -> { self.color ||= 'foo' })
+    base.send(:after_initialize, -> { callbacks.each { |callback| callback.call(self) } } )
   end
 
 end
